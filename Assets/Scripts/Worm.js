@@ -1,55 +1,137 @@
 /*jshint esversion: 6 */
 class Worm
 {
-    constructor(headPosX, headPosY, radius)
+    constructor(headPos, radius, bodySegmentsNum)
     {
-        this.headPosX = headPosX;
-        this.headPosY = headPosY;
+        this.headPos = headPos;
         this.radius = radius;
+        this.bodySegmentsNum = bodySegmentsNum
+        this.bodySegments = [];
+        this.bodySegments[0] = headPos;
+
+        this.distBetweenSegments = 1;
+        this.radiusDecaySegments = round(bodySegmentsNum * 0.4);
+        this.unedibleSegments = round(bodySegmentsNum * 0.1);
+
+        this.angularSpeed = 0.12;
+        this.moveAngle = 0;
+        this.baseMoveSpeed = 1.7;
+        this.moveSpeed = 0.5;
+        this.turnSpeedBoost = 1.5;
+
+        this.cMoveSpeed = 0;
+        this.minSegDistToUpdate = 1;
     }
 
     Update()
     {
-        this.Move(random(-2, 2), random(-2, 2));
+        this.Move();
     }
 
     Show()
     {
-        ellipse(this.headPosX, this.headPosY, this.radius, this.radius);
-        ellipse(10, 10, 30, 30);
+        let dSidePointsA = [];
+        let dSidePointsB = [];
+        for (let i = 1; i < this.bodySegments.length - 1; i++)
+        {
+            let dx = this.bodySegments[i - 1].x - this.bodySegments[i].x;
+            let dy = this.bodySegments[i - 1].y - this.bodySegments[i].y;
+            let decayRatio = min(1, (this.bodySegments.length - i) / this.radiusDecaySegments);
+            let inverseMag = this.radius * decayRatio / sqrt(dx * dx + dy * dy);
+            dSidePointsA[i] = createVector(- dy * inverseMag, dx * inverseMag);
+            dSidePointsB[i] = createVector(dy * inverseMag, - dx * inverseMag);
+            if (i == 1) ellipse(this.headPos.x, this.headPos.y, 2 * this.radius * decayRatio, 2 * this.radius * decayRatio);
+        }
+
+        beginShape();
+        for (let i = 1; i < dSidePointsA.length; i++) vertex(this.bodySegments[i].x + dSidePointsA[i].x, this.bodySegments[i].y + dSidePointsA[i].y);
+        for (let i = dSidePointsB.length - 1; i > 1; i--) vertex(this.bodySegments[i].x + dSidePointsB[i].x, this.bodySegments[i].y + dSidePointsB[i].y);
+        endShape();
     }
 
-    Move(dx, dy)
+    Move()
     {
-        this.headPosX += dx;
-        this.headPosY -= dy;
+        if (this.moveAngle > 180 || this.moveAngle < -180) this.moveAngle - Math.sign(this.moveAngle) * 360;
+        let dv = createVector(this.cMoveSpeed * cos(this.moveAngle), this.cMoveSpeed * sin(this.moveAngle));
+        this.headPos = createVector(this.headPos.x + dv.x, this.headPos.y - dv.y);
+        let sqrDelta = pow(this.headPos.x - this.bodySegments[0].x, 2) + pow(this.headPos.y - this.bodySegments[0].y, 2)
+
+        if (sqrDelta > this.minSegDistToUpdate * this.minSegDistToUpdate)
+        {
+            this.bodySegments.unshift(this.headPos);
+        }
+        this.CreateTrail();
+    }
+
+    CreateTrail()
+    {
+        while (this.bodySegments.length > this.bodySegmentsNum)
+        {
+            this.bodySegments.pop();
+        }
+
+        for (let i = 1; i < this.bodySegments.length; i++)
+        {
+
+            let dx = this.bodySegments[i - 1].x - this.bodySegments[i].x;
+            let dy = this.bodySegments[i - 1].y - this.bodySegments[i].y;
+            let sqrDDist = dx * dx + dy * dy;
+
+            if (sqrDDist > this.distBetweenSegments * this.distBetweenSegments)
+            {
+                this.bodySegments[i] = createVector(this.bodySegments[i].x + dx * 0.65, this.bodySegments[i].y + dy * 0.65)
+            }
+        }
+    }
+
+    Grow(amount)
+    {
+        this.bodySegmentsNum += amount;
+        print("grew " + amount);
+    }
+
+    Cut(index)
+    {
+        print("lost " + (this.bodySegments.length - index));
+        //this.bodySegments.splice(index, this.bodySegments.length - index);
+        this.bodySegmentsNum -= (this.bodySegments.length - index);
+        this.bodySegments.splice(index, this.bodySegments.length - index)
     }
 }
 
 class PlayerWorm extends Worm
 {
-    constructor(moveSpeed, headPosX, headPosY, radius)
+    constructor(headPos, radius, bodySegmentsNum)
     {
-        super(headPosX, headPosY, radius);
-        this.moveSpeed = moveSpeed;
+        super(headPos, radius, bodySegmentsNum);
 
-        this.inputX = 0;
-        this.inputY = 0;
+        this.inputAxis = createVector(0, 0);
+        print("player");
     }
 
     Update()
     {
         this.HandlePlayerInput();
-        this.Move(this.inputX * this.moveSpeed, this.inputY * this.moveSpeed)
+        this.CreateTrail();
+        this.Move(this.inputAxis.x * this.moveSpeed, this.inputAxis.y * this.moveSpeed);
     }
 
     HandlePlayerInput()
     {
-        this.inputX = 0;
-        this.inputY = 0;
-        if (keyIsDown(UP_ARROW)) this.inputY += 1;
-        if (keyIsDown(DOWN_ARROW)) this.inputY -= 1;
-        if (keyIsDown(RIGHT_ARROW)) this.inputX += 1;
-        if (keyIsDown(LEFT_ARROW)) this.inputX -= 1;
+        //print(this.inputAxis);
+        this.inputAxis = createVector(0, 0);
+        if (keyIsDown(38) || keyIsDown(87)) this.inputAxis.y += 1;
+        if (keyIsDown(40) || keyIsDown(83)) this.inputAxis.y -= 1;
+        if (keyIsDown(39) || keyIsDown(68)) this.inputAxis.x += 1;
+        if (keyIsDown(37) || keyIsDown(65)) this.inputAxis.x -= 1;
+
+        if (this.inputAxis.x * this.inputAxis.x + this.inputAxis.y * this.inputAxis.y > 1)
+        {
+            this.inputAxis.x *= 0.707;
+            this.inputAxis.y *= 0.707;
+        }
+        this.cMoveSpeed = this.baseMoveSpeed + this.inputAxis.y * this.moveSpeed;
+        if (this.inputAxis.x != 0) this.cMoveSpeed += this.turnSpeedBoost;
+        this.moveAngle += -this.inputAxis.x * this.angularSpeed;
     }
 }
