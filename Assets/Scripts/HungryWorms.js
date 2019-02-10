@@ -1,12 +1,18 @@
 /*jshint esversion: 6 */
 var worms = [];
+
 var edibleSegmentsInterval = 5;
+
+var currentCamPos;
 function setup()
 {
   createCanvas(600, 600);
 
-  // CreateWorm(createVector(width / 2, height / 2), 7, true);
+  CreateWorm(createVector(width / 2, height / 2), 7, true);
   CreateWorm(createVector(width / 3, height / 3), 7, true);
+  CreateWorm(createVector(2 * width / 3, height / 3), 7, true);
+  CreateWorm(createVector(width / 3, 2 * height / 3), 7, true);
+  CreateWorm(createVector(2 * width / 3, 2 * height / 3), 7, true);
 }
 
 function draw()
@@ -37,10 +43,16 @@ function UpdateWorms()
 
 function ShowWorms()
 {
+  CalCamPosition(0);
   for (let i = 0; i < worms.length; i++)
   {
-    worms[i].Show();
+    worms[i].Show(currentCamPos);
   }
+}
+
+function CalCamPosition(index)
+{
+  currentCamPos = createVector(worms[index].headPos.x - width * 0.5, worms[index].headPos.y - height * 0.5);
 }
 
 function CheckWormsConsuption()

@@ -28,7 +28,7 @@ class Worm
         this.Move();
     }
 
-    Show()
+    Show(camPos)
     {
         let dSidePointsA = [];
         let dSidePointsB = [];
@@ -40,12 +40,11 @@ class Worm
             let inverseMag = this.radius * decayRatio / sqrt(dx * dx + dy * dy);
             dSidePointsA[i] = createVector(- dy * inverseMag, dx * inverseMag);
             dSidePointsB[i] = createVector(dy * inverseMag, - dx * inverseMag);
-            if (i == 1) ellipse(this.headPos.x, this.headPos.y, 2 * this.radius * decayRatio, 2 * this.radius * decayRatio);
+            if (i == 1) ellipse(this.headPos.x - camPos.x, this.headPos.y - camPos.y, 2 * this.radius * decayRatio, 2 * this.radius * decayRatio);
         }
-
         beginShape();
-        for (let i = 1; i < dSidePointsA.length; i++) vertex(this.bodySegments[i].x + dSidePointsA[i].x, this.bodySegments[i].y + dSidePointsA[i].y);
-        for (let i = dSidePointsB.length - 1; i > 1; i--) vertex(this.bodySegments[i].x + dSidePointsB[i].x, this.bodySegments[i].y + dSidePointsB[i].y);
+        for (let i = 1; i < dSidePointsA.length; i++) vertex(this.bodySegments[i].x + dSidePointsA[i].x - camPos.x, this.bodySegments[i].y + dSidePointsA[i].y - camPos.y);
+        for (let i = dSidePointsB.length - 1; i > 1; i--) vertex(this.bodySegments[i].x + dSidePointsB[i].x - camPos.x, this.bodySegments[i].y + dSidePointsB[i].y - camPos.y);
         endShape();
     }
 
@@ -54,13 +53,13 @@ class Worm
         if (this.moveAngle > 180 || this.moveAngle < -180) this.moveAngle - Math.sign(this.moveAngle) * 360;
         let dv = createVector(this.cMoveSpeed * cos(this.moveAngle), this.cMoveSpeed * sin(this.moveAngle));
         this.headPos = createVector(this.headPos.x + dv.x, this.headPos.y - dv.y);
-        let sqrDelta = pow(this.headPos.x - this.bodySegments[0].x, 2) + pow(this.headPos.y - this.bodySegments[0].y, 2)
-
-        if (sqrDelta > this.minSegDistToUpdate * this.minSegDistToUpdate)
+        let delta = sqrt(pow(this.headPos.x - this.bodySegments[0].x, 2) + pow(this.headPos.y - this.bodySegments[0].y, 2));
+        if (delta > this.minSegDistToUpdate)
         {
             this.bodySegments.unshift(this.headPos);
         }
         this.CreateTrail();
+
     }
 
     CreateTrail()
@@ -93,7 +92,6 @@ class Worm
     Cut(index)
     {
         print("lost " + (this.bodySegments.length - index));
-        //this.bodySegments.splice(index, this.bodySegments.length - index);
         this.bodySegmentsNum -= (this.bodySegments.length - index);
         this.bodySegments.splice(index, this.bodySegments.length - index)
     }
@@ -118,7 +116,6 @@ class PlayerWorm extends Worm
 
     HandlePlayerInput()
     {
-        //print(this.inputAxis);
         this.inputAxis = createVector(0, 0);
         if (keyIsDown(38) || keyIsDown(87)) this.inputAxis.y += 1;
         if (keyIsDown(40) || keyIsDown(83)) this.inputAxis.y -= 1;
