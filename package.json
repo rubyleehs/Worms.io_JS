@@ -1,0 +1,28 @@
+{
+  "name": "sockets_worm_tut",
+  "version": "1.0.0",
+  "description": "tct_tut_12.2_express_with_node",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rubyleehs/Worms.io_JS.git"
+  },
+  "keywords": [
+    "sockets",
+    "p5.js",
+    "node"
+  ],
+  "author": "rubyleehs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rubyleehs/Worms.io_JS/issues"
+  },
+  "homepage": "https://github.com/rubyleehs/Worms.io_JS#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
