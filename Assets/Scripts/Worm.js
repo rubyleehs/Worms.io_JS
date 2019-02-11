@@ -4,6 +4,8 @@ class Worm
     constructor(headPos, radius, bodySegmentsNum)
     {
         this.headPos = headPos;
+        this.camPos = headPos;
+
         this.radius = radius;
         this.bodySegmentsNum = bodySegmentsNum
         this.bodySegments = [];
@@ -12,6 +14,8 @@ class Worm
         this.distBetweenSegments = 1;
         this.radiusDecaySegments = round(bodySegmentsNum * 0.4);
         this.unedibleSegments = round(bodySegmentsNum * 0.1);
+
+        this.camLerpSpeed = 0.04;
 
         this.angularSpeed = 0.12;
         this.moveAngle = 0;
@@ -53,6 +57,8 @@ class Worm
         if (this.moveAngle > 180 || this.moveAngle < -180) this.moveAngle - Math.sign(this.moveAngle) * 360;
         let dv = createVector(this.cMoveSpeed * cos(this.moveAngle), this.cMoveSpeed * sin(this.moveAngle));
         this.headPos = createVector(this.headPos.x + dv.x, this.headPos.y - dv.y);
+        this.camPos = createVector((this.headPos.x - this.camPos.x) * this.camLerpSpeed + this.camPos.x, (this.headPos.y - this.camPos.y) * this.camLerpSpeed + this.camPos.y);
+
         let delta = sqrt(pow(this.headPos.x - this.bodySegments[0].x, 2) + pow(this.headPos.y - this.bodySegments[0].y, 2));
         if (delta > this.minSegDistToUpdate)
         {
@@ -111,7 +117,7 @@ class PlayerWorm extends Worm
     {
         this.HandlePlayerInput();
         this.CreateTrail();
-        this.Move(this.inputAxis.x * this.moveSpeed, this.inputAxis.y * this.moveSpeed);
+        this.Move();
     }
 
     HandlePlayerInput()

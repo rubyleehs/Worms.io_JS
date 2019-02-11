@@ -1,5 +1,6 @@
 /*jshint esversion: 6 */
 var worms = [];
+var consumables = [];
 
 var edibleSegmentsInterval = 5;
 
@@ -10,16 +11,14 @@ function setup()
 
   CreateWorm(createVector(width / 2, height / 2), 7, true);
   CreateWorm(createVector(width / 3, height / 3), 7, true);
-  CreateWorm(createVector(2 * width / 3, height / 3), 7, true);
-  CreateWorm(createVector(width / 3, 2 * height / 3), 7, true);
-  CreateWorm(createVector(2 * width / 3, 2 * height / 3), 7, true);
+  CreateConsumable(createVector(2, 2), 25);
 }
 
 function draw()
 {
   background(32, 31, 32);
-  UpdateWorms();
-  ShowWorms();
+  Update();
+  Show();
 }
 
 function CreateWorm(position, radius, isPlayer)
@@ -31,7 +30,13 @@ function CreateWorm(position, radius, isPlayer)
   worms[worms.length] = w;
 }
 
-function UpdateWorms()
+function CreateConsumable(position, amount)
+{
+  let c = new Consumable(position, amount);
+  consumables[consumables.length] = c;
+}
+
+function Update()
 {
   for (let i = 0; i < worms.length; i++)
   {
@@ -41,9 +46,13 @@ function UpdateWorms()
   CheckWormsConsuption();
 }
 
-function ShowWorms()
+function Show()
 {
   CalCamPosition(0);
+  for (let i = 0; i < consumables.length; i++)
+  {
+    consumables[i].Show(currentCamPos);
+  }
   for (let i = 0; i < worms.length; i++)
   {
     worms[i].Show(currentCamPos);
@@ -52,7 +61,7 @@ function ShowWorms()
 
 function CalCamPosition(index)
 {
-  currentCamPos = createVector(worms[index].headPos.x - width * 0.5, worms[index].headPos.y - height * 0.5);
+  currentCamPos = createVector(worms[index].camPos.x - width * 0.5, worms[index].camPos.y - height * 0.5);
 }
 
 function CheckWormsConsuption()
@@ -72,6 +81,17 @@ function CheckWormsConsuption()
           worms[w].Grow(worms[i].bodySegments.length - s);
           worms[i].Cut(s);
         }
+      }
+    }
+
+    for (let i = 0; i < consumables.length; i++)
+    {
+      let deltaX = consumables[i].position.x - headPos.x;
+      let deltaY = consumables[i].position.y - headPos.y;
+      if (deltaX * deltaX + deltaY * deltaY < consumables[i].radius * consumables[i].radius)
+      {
+        worms[w].Grow(consumables[i].amount);
+        consumables.splice(i, 1);
       }
     }
   }
