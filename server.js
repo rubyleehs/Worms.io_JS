@@ -17,10 +17,19 @@ http.listen(3000, function ()
 function Connection(socket)
 {
     console.log('a user connected');
+
     socket.on('disconnect', OnDisconnect);
+    socket.on('input', OnInput);
+
 }
 
 function OnDisconnect()
 {
     console.log('user disconnected');
+}
+
+
+function OnInput(input)
+{
+    console.log('input received: ' + input);
 }

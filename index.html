@@ -11,18 +11,64 @@
       margin: 0;
     }
   </style>
-  <script src="Resources/p5.min.js"></script>
-  <script src="Resources/Addons/p5.dom.min.js"></script>
-  <script src="Resources/Addons/p5.sound.min.js"></script>
-  <script src="Assets/Scripts/HungryWorms.js"></script>
-  <script src="Assets/Scripts/Worm.js"></script>
-  <script src="Assets/Scripts/Consumables.js"></script>
+  <script src="file:///D:/Documents/GitHub/p5/Worms.io/Resources/p5.min.js"></script>
+  <script src="file:///D:/Documents/GitHub/p5/Worms.io/Resources/Addons/p5.dom.min.js"></script>
+  <script src="file:///D:/Documents/GitHub/p5/Worms.io/Resources/Addons/p5.sound.min.js"></script>
+  <script src="file:///D:/Documents/GitHub/p5/Worms.io/Assets/Scripts/HungryWorms.js"></script>
+  <script src="file:///D:/Documents/GitHub/p5/Worms.io/Assets/Scripts/Worm.js"></script>
+  <script src="file:///D:/Documents/GitHub/p5/Worms.io/Assets/Scripts/Consumables.js"></script>
 </head>
 
 <body>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script>
     var socket = io();
+    var keys = [];
+    let axialKeys = new Array(4).fill(false);
+
+    $(document).keydown(function (e)
+    {
+      keys[e.which] = true;
+      printKeys();
+    });
+
+    $(document).keyup(function (e)
+    {
+      keys[e.which] = false;
+      printKeys();
+    });
+
+    function printKeys()
+    {
+      if (keys[65] || keys[37]) axialKeys[0] = true;
+      else axialKeys[0] = false;
+
+      if (keys[87] || keys[38]) axialKeys[1] = true;
+      else axialKeys[1] = false;
+
+      if (keys[68] || keys[39]) axialKeys[2] = true;
+      else axialKeys[2] = false;
+
+      if (keys[83] || keys[40]) axialKeys[3] = true;
+      else axialKeys[3] = false;
+
+      socket.emit('input', axialKeys);
+
+      /*
+      for (let i in keys)
+      {
+        if (!keys.hasOwnProperty(i)) continue;
+        if (i >= 37 && i <= 40)
+        {
+          axialKeys[i - 37] = keys[i];
+        }
+
+        console.log(axialKeys);
+        socket.emit('input', keys);
+      }
+      */
+    }
   </script>
 </body>
 
