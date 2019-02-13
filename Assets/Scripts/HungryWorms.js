@@ -1,4 +1,6 @@
 /*jshint esversion: 6 */
+var socket;
+
 var worms = [];
 var consumables = [];
 

@@ -23,6 +23,8 @@
   },
   "homepage": "https://github.com/rubyleehs/Worms.io_JS#readme",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "save": "^2.3.3",
+    "socket.io": "^2.2.0"
   }
 }
