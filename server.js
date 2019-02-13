@@ -1,7 +1,10 @@
-var app = require('express')();
-var http = require('http').Server(app);
+var express = require('express');
+var app = express();
+var http = require('http').Server(express);
 var io = require('socket.io')(http);
-//7 mins of 12.3 but mots likely need to change. replace index with full file paths(for now)
+
+app.use(express.static('public'));
+
 app.get('/', function (req, res)
 {
     res.sendFile(__dirname + '/index.html');
