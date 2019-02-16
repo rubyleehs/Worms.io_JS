@@ -13,9 +13,8 @@ function setup()
   createCanvas(600, 600);
   socket = io.connect('http://localhost:3000');
 
-  CreateWorm([random(10), random(10)], 7, true);
   CreateConsumable([2, 2], 25);
-
+  socket.on('assignWorm', CreateWorm);
   socket.on('Heartbeat', Heartbeat);
 }
 
@@ -28,26 +27,30 @@ function draw()
 
 function Heartbeat(data)
 {
-  console.log(data);
+  console.log('worm length in client heartbeat: ' + worms.length);
+  for (let i = 0; i < data.length; i++)
+  {
+    if (worms[i] == undefined)
+    {
+      worms[i] = new PlayerWorm(data[i].headPos, data[i].radius, data[i].bodySegmentsNum)
+      worms[i].Start();
+    }
+    worms[i].headPos = data[i].headPos;
+    worms[i].moveAngle = data[i].moveAngle;
+    worms[i].radius = data[i].radius;
+    worms[i].bodySegmentsNum = data[i].bodySegmentsNum;
+    worms[i].bodySegments = data[i].bodySegments;
+  }
 }
 
-function CreateWorm(position, radius, isPlayer)
+function CreateWorm(data)
 {
-  let w;
-  if (isPlayer) w = new PlayerWorm(position, radius, 250);
-  else w = new Worm(position, radius, 200);
-
-  var data = {
-    hx: w.headPos[0],
-    headPos: w.headPos,
-    camPos: w.camPos,
-    radius: w.radius,
-    bodySegmentsNum: w.bodySegmentsNum
-  };
+  let w = new PlayerWorm(data.headPos, data.radius, data.bodySegmentsNum);
   w.Start();
-  socket.emit('start', data);
-  cWormIndex = worms.length;
-  worms[worms.length] = w;
+  cWormIndex = data.index;
+  worms[data.index] = w;
+
+  console.log('client worm created at' + data.headPos);
 }
 
 function CreateConsumable(position, amount)
@@ -58,13 +61,13 @@ function CreateConsumable(position, amount)
 
 function Update()
 {
+  if (cWormIndex == undefined) return;
   let w = worms[cWormIndex];
   w.Update();
   CheckWormsConsuption();
 
   var data = {
     headPos: w.headPos,
-    camPos: w.camPos,
     radius: w.radius,
     bodySegmentsNum: w.bodySegmentsNum,
     bodySegments: w.bodySegments,
@@ -75,13 +78,17 @@ function Update()
 
 function Show()
 {
-  CalCamPosition(0);
+  if (cWormIndex == undefined) return;
+
+  CalCamPosition(cWormIndex);
   for (let i = 0; i < consumables.length; i++)
   {
     consumables[i].Show(currentCamPos);
   }
   for (let i = 0; i < worms.length; i++)
   {
+    if (worms[i] == undefined) continue;
+
     worms[i].Show(currentCamPos);
   }
 }
@@ -97,6 +104,9 @@ function CheckWormsConsuption()
 
   for (let i = 0; i < worms.length; i++)
   {
+    if (worms[i] == undefined) continue;
+    if (!worms[i].isReady) continue;
+
     for (let s = worms[i].unedibleSegments; s < worms[i].bodySegments.length; s += edibleSegmentsInterval)
     {
       let deltaX = worms[i].bodySegments[s][0] - headPos[0];
@@ -105,6 +115,11 @@ function CheckWormsConsuption()
       {
         worms[cWormIndex].Grow(worms[i].bodySegments.length - s);
         worms[i].Cut(s);
+        var data = {
+          wormIndex: i,
+          cutIndex: s,
+        }
+        socket.emit('cut', data);
       }
     }
   }

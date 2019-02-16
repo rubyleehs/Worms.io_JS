@@ -9,7 +9,6 @@ function Worm(id, headPos, camPos, radius, bodySegmentsNum)
 {
     this.id = id;
     this.headPos = headPos;
-    this.camPos = camPos;
     this.moveAngle;
 
     this.radius = radius;
@@ -25,7 +24,7 @@ setInterval(Heartbeat, 1000);
 
 function Heartbeat()
 {
-    io.sockets.emit('Heartbeat', 'hello');
+    io.sockets.emit('Heartbeat', worms);
 }
 
 function Listen()
@@ -45,18 +44,13 @@ io.on('connection', Connection);
 function Connection(socket)
 {
     console.log('We have a new client: ' + socket.id);
+    CreateNewWorm(socket);
 
     socket.on('disconnect', function ()
     {
         console.log('A client left: ' + socket.id);
         socket.removeAllListeners('disconnect');
         //socket.broadcast.emit('disconnect', socket);
-    });
-
-    socket.on('start', function (data)
-    {
-        let cWormIndex = worms.push(new Worm(socket.id, data.headPos, data.camPos, data.radius, data.bodySegmentsNum)) - 1;
-        console.log(worms[cWormIndex]);
     });
 
     socket.on('update', function (data)
@@ -67,13 +61,30 @@ function Connection(socket)
             if (socket.id == worms[i].id) cWorm = worms[i];
         }
         cWorm.headPos = data.headPos;
-        cWorm.camPos = data.camPos;
         cWorm.moveAngle = data.moveAngle;
         cWorm.radius = data.radius;
         cWorm.bodySegmentsNum = data.bodySegmentsNum
         cWorm.bodySegments = data.bodySegments;
-
-        console.log('update received from: ' + socket.id);
-        console.log(data.headPos)
     });
+
+    socket.on('cut', function (data)
+    {
+        worms[data.wormIndex].bodySegmentsNum -= (worms[data.wormIndex].bodySegments.length - data.cutIndex);
+        worms[data.wormIndex].bodySegments.splice(data.cutIndex, worms[data.wormIndex].bodySegments.length - data.cutIndex);
+    })
+}
+
+function CreateNewWorm(socket)
+{
+    let pos = [Math.random() * 10, Math.random() * 10]
+    let w = new Worm(socket.id, pos, pos, 7, 250);
+    console.log('W.POSITION:' + w.headPos);
+    worms.push(w);
+    let data = {
+        index: worms.length - 1,
+        headPos: w.headPos,
+        radius: w.radius,
+        bodySegmentsNum: w.bodySegmentsNum,
+    }
+    socket.emit("assignWorm", data);
 }

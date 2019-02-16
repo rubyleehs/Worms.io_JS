@@ -3,6 +3,7 @@ class Worm
 {
     constructor(headPos, radius, bodySegmentsNum)
     {
+        this.isReady = false;
         //this.id = id;
         this.headPos = [];
         this.headPos = headPos;
@@ -17,6 +18,7 @@ class Worm
 
     Start()
     {
+
         this.bodySegments[0] = this.headPos;
 
         this.distBetweenSegments = 1;
@@ -32,7 +34,8 @@ class Worm
 
         this.cMoveSpeed = 0;
         this.minSegDistToUpdate = 1.5;
-        this.constains = [500, 500];
+        this.constains = [100, 100];
+        this.isReady = true;
     }
 
     Update()
