@@ -15,6 +15,8 @@ function setup()
 
   CreateWorm([random(10), random(10)], 7, true);
   CreateConsumable([2, 2], 25);
+
+  socket.on('Heartbeat', Heartbeat);
 }
 
 function draw()
@@ -22,6 +24,11 @@ function draw()
   background(32, 31, 32);
   Update();
   Show();
+}
+
+function Heartbeat(data)
+{
+  console.log(data);
 }
 
 function CreateWorm(position, radius, isPlayer)
@@ -61,6 +68,7 @@ function Update()
     radius: w.radius,
     bodySegmentsNum: w.bodySegmentsNum,
     bodySegments: w.bodySegments,
+    moveAngle: w.moveAngle,
   };
   socket.emit('update', data);
 }

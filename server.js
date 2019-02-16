@@ -10,6 +10,7 @@ function Worm(id, headPos, camPos, radius, bodySegmentsNum)
     this.id = id;
     this.headPos = headPos;
     this.camPos = camPos;
+    this.moveAngle;
 
     this.radius = radius;
     this.bodySegmentsNum = bodySegmentsNum;
@@ -19,6 +20,13 @@ function Worm(id, headPos, camPos, radius, bodySegmentsNum)
 
 server.listen(3000, Listen);
 app.use(express.static('public'));
+
+setInterval(Heartbeat, 1000);
+
+function Heartbeat()
+{
+    io.sockets.emit('Heartbeat', 'hello');
+}
 
 function Listen()
 {
@@ -60,6 +68,7 @@ function Connection(socket)
         }
         cWorm.headPos = data.headPos;
         cWorm.camPos = data.camPos;
+        cWorm.moveAngle = data.moveAngle;
         cWorm.radius = data.radius;
         cWorm.bodySegmentsNum = data.bodySegmentsNum
         cWorm.bodySegments = data.bodySegments;
