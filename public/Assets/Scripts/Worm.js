@@ -1,9 +1,9 @@
 /*jshint esversion: 6 */
 class Worm
 {
-    constructor(headPos, radius, bodySegmentsNum)
+    constructor(id, headPos, radius, bodySegmentsNum)
     {
-        //this.id = id;
+        this.id = id;
         this.headPos = headPos;
         this.camPos = headPos;
 
