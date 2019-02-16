@@ -4,7 +4,6 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
 var worms = [];
-var cWorm;
 
 function Worm(id, hx, hy, cx, cy, radius, bodySegmentsNum)
 {
@@ -47,8 +46,7 @@ function Connection(socket)
 
     socket.on('start', function (data)
     {
-        cWorm = new Worm(socket.id, data.hx, data.hy, data.cx, data.cy, data.radius, data.bodySegmentsNum);
-        console.log(cWorm);
-        worms.push(cWorm);
+        let cWormIndex = worms.push(new Worm(socket.id, data.hx, data.hy, data.cx, data.cy, data.radius, data.bodySegmentsNum)) - 1;
+        console.log(worms[cWormIndex]);
     })
 }
