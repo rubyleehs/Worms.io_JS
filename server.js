@@ -1,9 +1,19 @@
 var express = require('express');
 var app = express();
-var http = require('http').createServer(app);
-var io = require('socket.io')(http);
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
 
+var worms = [];
+
+server.listen(3000, Listen);
 app.use(express.static('public'));
+
+function Listen()
+{
+    console.log('listening on *:3000');
+    var host = server.address().address;
+    var port = server.address().port;
+}
 
 app.get('/', function (req, res)
 {
@@ -12,27 +22,14 @@ app.get('/', function (req, res)
 
 io.on('connection', Connection);
 
-http.listen(3000, function ()
-{
-    console.log('listening on *:3000');
-});
-
 function Connection(socket)
 {
-    console.log('a user connected');
+    console.log('We have a new client: ' + socket.id);
 
-    socket.on('disconnect', OnDisconnect);
-    socket.on('input', OnInput);
-
-}
-
-function OnDisconnect()
-{
-    console.log('user disconnected');
-}
-
-
-function OnInput(input)
-{
-    console.log('input received: ' + input);
+    socket.on('disconnect', function ()
+    {
+        console.log('A client left: ' + socket.id);
+        socket.removeAllListeners('disconnect');
+        //socket.broadcast.emit('disconnect', socket);
+    });
 }

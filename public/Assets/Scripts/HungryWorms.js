@@ -10,6 +10,7 @@ var currentCamPos;
 function setup()
 {
   createCanvas(600, 600);
+  socket = io.connect('http://localhost:3000');
 
   CreateWorm(createVector(width / 2, height / 2), 7, true);
   CreateWorm(createVector(width / 3, height / 3), 7, true);
