@@ -32,9 +32,8 @@ function CreateWorm(position, radius, isPlayer)
 
   var data = {
     hx: w.headPos[0],
-    hy: w.headPos[1],
-    cx: w.camPos[0],
-    cy: w.camPos[1],
+    headPos: w.headPos,
+    camPos: w.camPos,
     radius: w.radius,
     bodySegmentsNum: w.bodySegmentsNum
   };
@@ -57,10 +56,8 @@ function Update()
   CheckWormsConsuption();
 
   var data = {
-    hx: w.headPos[0],
-    hy: w.headPos[1],
-    cx: w.camPos[0],
-    cy: w.camPos[1],
+    headPos: w.headPos,
+    camPos: w.camPos,
     radius: w.radius,
     bodySegmentsNum: w.bodySegmentsNum,
     bodySegments: w.bodySegments,

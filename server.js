@@ -5,16 +5,16 @@ var io = require('socket.io')(server);
 
 var worms = [];
 
-function Worm(id, hx, hy, cx, cy, radius, bodySegmentsNum)
+function Worm(id, headPos, camPos, radius, bodySegmentsNum)
 {
     this.id = id;
-    this.headPos = [hx, hy];
-    this.camPos = [cx, cy];
+    this.headPos = headPos;
+    this.camPos = camPos;
 
     this.radius = radius;
     this.bodySegmentsNum = bodySegmentsNum;
     this.bodySegments = [];
-    this.bodySegments[0] = [hx, hy];
+    this.bodySegments[0] = headPos;
 }
 
 server.listen(3000, Listen);
@@ -47,7 +47,7 @@ function Connection(socket)
 
     socket.on('start', function (data)
     {
-        let cWormIndex = worms.push(new Worm(socket.id, data.hx, data.hy, data.cx, data.cy, data.radius, data.bodySegmentsNum)) - 1;
+        let cWormIndex = worms.push(new Worm(socket.id, data.headPos, data.camPos, data.radius, data.bodySegmentsNum)) - 1;
         console.log(worms[cWormIndex]);
     });
 
@@ -58,12 +58,13 @@ function Connection(socket)
         {
             if (socket.id == worms[i].id) cWorm = worms[i];
         }
-        cWorm.headPos = [data.hx, data.hy];
-        cWorm.camPos = [data.cx, data.cy];
+        cWorm.headPos = data.headPos;
+        cWorm.camPos = data.camPos;
         cWorm.radius = data.radius;
         cWorm.bodySegmentsNum = data.bodySegmentsNum
         cWorm.bodySegments = data.bodySegments;
 
         console.log('update received from: ' + socket.id);
+        console.log(data.headPos)
     });
 }

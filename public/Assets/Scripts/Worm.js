@@ -32,6 +32,7 @@ class Worm
 
         this.cMoveSpeed = 0;
         this.minSegDistToUpdate = 1.5;
+        this.constains = [3000, 3000];
     }
 
     Update()
@@ -61,13 +62,21 @@ class Worm
 
     Move()
     {
-        if (this.moveAngle > 180 || this.moveAngle < -180) this.moveAngle - Math.sign(this.moveAngle) * 360;
+        if (this.moveAngle > PI || this.moveAngle < -PI) this.moveAngle -= Math.sign(this.moveAngle) * 2 * PI;
         let dv = [this.cMoveSpeed * cos(this.moveAngle), this.cMoveSpeed * sin(this.moveAngle)];
         this.headPos = [this.headPos[0] + dv[0], this.headPos[1] - dv[1]];
+
+        this.headPos[0] = constrain(this.headPos[0], -this.constains[0], this.constains[0]);
+        this.headPos[1] = constrain(this.headPos[1], -this.constains[1], this.constains[1]);
+
         this.camPos = [(this.headPos[0] - this.camPos[0]) * this.camLerpSpeed + this.camPos[0], (this.headPos[1] - this.camPos[1]) * this.camLerpSpeed + this.camPos[1]];
 
-        let delta = sqrt(pow(this.headPos[0] - this.bodySegments[0][0], 2) + pow(this.headPos[1] - this.bodySegments[0][1], 2));
-        if (delta > this.minSegDistToUpdate)
+        let delta = [this.headPos[0] - this.bodySegments[0][0], this.headPos[1] - this.bodySegments[0][1]];
+        this.moveAngle = atan(delta[1] / -delta[0])
+        if (delta[0] < 0) this.moveAngle -= PI * Math.sign(delta[1]);
+
+        let sqrDeltaM = pow(delta[0], 2) + pow(delta[1], 2);
+        if (sqrDeltaM > this.minSegDistToUpdate * this.minSegDistToUpdate)
         {
             this.bodySegments.unshift(this.headPos);
         }
