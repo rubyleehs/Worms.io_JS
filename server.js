@@ -12,8 +12,9 @@ function Worm(id, hx, hy, cx, cy, radius, bodySegmentsNum)
     this.camPos = [cx, cy];
 
     this.radius = radius;
-    this.bodySegmentsNum = bodySegmentsNum
+    this.bodySegmentsNum = bodySegmentsNum;
     this.bodySegments = [];
+    this.bodySegments[0] = [hx, hy];
 }
 
 server.listen(3000, Listen);
@@ -48,5 +49,21 @@ function Connection(socket)
     {
         let cWormIndex = worms.push(new Worm(socket.id, data.hx, data.hy, data.cx, data.cy, data.radius, data.bodySegmentsNum)) - 1;
         console.log(worms[cWormIndex]);
-    })
+    });
+
+    socket.on('update', function (data)
+    {
+        let cWorm;
+        for (let i = 0; i < worms.length; i++)
+        {
+            if (socket.id == worms[i].id) cWorm = worms[i];
+        }
+        cWorm.headPos = [data.hx, data.hy];
+        cWorm.camPos = [data.cx, data.cy];
+        cWorm.radius = data.radius;
+        cWorm.bodySegmentsNum = data.bodySegmentsNum
+        cWorm.bodySegments = data.bodySegments;
+
+        console.log(data);
+    });
 }

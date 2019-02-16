@@ -5,6 +5,7 @@ var worms = [];
 var consumables = [];
 
 var edibleSegmentsInterval = 5;
+var cWormIndex;
 
 var currentCamPos;
 function setup()
@@ -27,7 +28,7 @@ function draw()
 function CreateWorm(position, radius, isPlayer)
 {
   let w;
-  if (isPlayer) w = new PlayerWorm(position, radius, 500);
+  if (isPlayer) w = new PlayerWorm(position, radius, 250);
   else w = new Worm(position, radius, 200);
 
   var data = {
@@ -40,6 +41,7 @@ function CreateWorm(position, radius, isPlayer)
   };
   w.Start();
   socket.emit('start', data);
+  cWormIndex = worms.length;
   worms[worms.length] = w;
 }
 
@@ -51,12 +53,20 @@ function CreateConsumable(position, amount)
 
 function Update()
 {
-  for (let i = 0; i < worms.length; i++)
-  {
-    worms[i].Update();
-  }
-
+  let w = worms[cWormIndex];
+  w.Update();
   CheckWormsConsuption();
+
+  var data = {
+    hx: w.headPos.x,
+    hy: w.headPos.y,
+    cx: w.camPos.x,
+    cy: w.camPos.y,
+    radius: w.radius,
+    bodySegmentsNum: w.bodySegmentsNum,
+    bodySegments: [[0, 0], [1, 0], [2, 0], [3, 0]],
+  };
+  socket.emit('update', data);
 }
 
 function Show()
@@ -79,33 +89,30 @@ function CalCamPosition(index)
 
 function CheckWormsConsuption()
 {
-  for (let w = 0; w < worms.length; w++)
-  {
-    let headPos = worms[w].bodySegments[0];
+  let headPos = worms[cWormIndex].bodySegments[0];
 
-    for (let i = 0; i < worms.length; i++)
+  for (let i = 0; i < worms.length; i++)
+  {
+    for (let s = worms[i].unedibleSegments; s < worms[i].bodySegments.length; s += edibleSegmentsInterval)
     {
-      for (let s = worms[i].unedibleSegments; s < worms[i].bodySegments.length; s += edibleSegmentsInterval)
+      let deltaX = worms[i].bodySegments[s].x - headPos.x;
+      let deltaY = worms[i].bodySegments[s].y - headPos.y;
+      if (deltaX * deltaX + deltaY * deltaY < worms[i].radius * worms[i].radius)
       {
-        let deltaX = worms[i].bodySegments[s].x - headPos.x;
-        let deltaY = worms[i].bodySegments[s].y - headPos.y;
-        if (deltaX * deltaX + deltaY * deltaY < worms[i].radius * worms[i].radius)
-        {
-          worms[w].Grow(worms[i].bodySegments.length - s);
-          worms[i].Cut(s);
-        }
+        worms[cWormIndex].Grow(worms[i].bodySegments.length - s);
+        worms[i].Cut(s);
       }
     }
+  }
 
-    for (let i = 0; i < consumables.length; i++)
+  for (let i = 0; i < consumables.length; i++)
+  {
+    let deltaX = consumables[i].position.x - headPos.x;
+    let deltaY = consumables[i].position.y - headPos.y;
+    if (deltaX * deltaX + deltaY * deltaY < consumables[i].radius * consumables[i].radius)
     {
-      let deltaX = consumables[i].position.x - headPos.x;
-      let deltaY = consumables[i].position.y - headPos.y;
-      if (deltaX * deltaX + deltaY * deltaY < consumables[i].radius * consumables[i].radius)
-      {
-        worms[w].Grow(consumables[i].amount);
-        consumables.splice(i, 1);
-      }
+      worms[cWormIndex].Grow(consumables[i].amount);
+      consumables.splice(i, 1);
     }
   }
 }
