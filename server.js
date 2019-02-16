@@ -4,12 +4,13 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
 var worms = [];
+var cWorm;
 
-function Worm(id, headPos, camPos, radius, bodySegmentsNum)
+function Worm(id, hx, hy, cx, cy, radius, bodySegmentsNum)
 {
     this.id = id;
-    this.headPos = headPos;
-    this.camPos = camPos;
+    this.headPos = [hx, hy];
+    this.camPos = [cx, cy];
 
     this.radius = radius;
     this.bodySegmentsNum = bodySegmentsNum
@@ -43,4 +44,11 @@ function Connection(socket)
         socket.removeAllListeners('disconnect');
         //socket.broadcast.emit('disconnect', socket);
     });
+
+    socket.on('start', function (data)
+    {
+        cWorm = new Worm(socket.id, data.hx, data.hy, data.cx, data.cy, data.radius, data.bodySegmentsNum);
+        console.log(cWorm);
+        worms.push(cWorm);
+    })
 }

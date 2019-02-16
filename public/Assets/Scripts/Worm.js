@@ -29,7 +29,7 @@ class Worm
         this.turnSpeedBoost = 1.5;
 
         this.cMoveSpeed = 0;
-        this.minSegDistToUpdate = 1;
+        this.minSegDistToUpdate = 1.5;
     }
 
     Update()
