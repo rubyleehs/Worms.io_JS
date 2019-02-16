@@ -4,7 +4,9 @@ class Worm
     constructor(headPos, radius, bodySegmentsNum)
     {
         //this.id = id;
+        this.headPos = [];
         this.headPos = headPos;
+        this.camPos = [];
         this.camPos = headPos;
 
         this.radius = radius;
@@ -43,28 +45,28 @@ class Worm
         let dSidePointsB = [];
         for (let i = 1; i < this.bodySegments.length - 1; i++)
         {
-            let dx = this.bodySegments[i - 1].x - this.bodySegments[i].x;
-            let dy = this.bodySegments[i - 1].y - this.bodySegments[i].y;
+            let dx = this.bodySegments[i - 1][0] - this.bodySegments[i][0];
+            let dy = this.bodySegments[i - 1][1] - this.bodySegments[i][1];
             let decayRatio = min(1, (this.bodySegments.length - i) / this.radiusDecaySegments);
             let inverseMag = this.radius * decayRatio / sqrt(dx * dx + dy * dy);
-            dSidePointsA[i] = createVector(- dy * inverseMag, dx * inverseMag);
-            dSidePointsB[i] = createVector(dy * inverseMag, - dx * inverseMag);
-            if (i == 1) ellipse(this.headPos.x - camPos.x, this.headPos.y - camPos.y, 2 * this.radius * decayRatio, 2 * this.radius * decayRatio);
+            dSidePointsA[i] = [- dy * inverseMag, dx * inverseMag];
+            dSidePointsB[i] = [dy * inverseMag, - dx * inverseMag];
+            if (i == 1) ellipse(this.headPos[0] - camPos[0], this.headPos[1] - camPos[1], 2 * this.radius * decayRatio, 2 * this.radius * decayRatio);
         }
         beginShape();
-        for (let i = 1; i < dSidePointsA.length; i++) vertex(this.bodySegments[i].x + dSidePointsA[i].x - camPos.x, this.bodySegments[i].y + dSidePointsA[i].y - camPos.y);
-        for (let i = dSidePointsB.length - 1; i > 1; i--) vertex(this.bodySegments[i].x + dSidePointsB[i].x - camPos.x, this.bodySegments[i].y + dSidePointsB[i].y - camPos.y);
+        for (let i = 1; i < dSidePointsA.length; i++) vertex(this.bodySegments[i][0] + dSidePointsA[i][0] - camPos[0], this.bodySegments[i][1] + dSidePointsA[i][1] - camPos[1]);
+        for (let i = dSidePointsB.length - 1; i > 1; i--) vertex(this.bodySegments[i][0] + dSidePointsB[i][0] - camPos[0], this.bodySegments[i][1] + dSidePointsB[i][1] - camPos[1]);
         endShape();
     }
 
     Move()
     {
         if (this.moveAngle > 180 || this.moveAngle < -180) this.moveAngle - Math.sign(this.moveAngle) * 360;
-        let dv = createVector(this.cMoveSpeed * cos(this.moveAngle), this.cMoveSpeed * sin(this.moveAngle));
-        this.headPos = createVector(this.headPos.x + dv.x, this.headPos.y - dv.y);
-        this.camPos = createVector((this.headPos.x - this.camPos.x) * this.camLerpSpeed + this.camPos.x, (this.headPos.y - this.camPos.y) * this.camLerpSpeed + this.camPos.y);
+        let dv = [this.cMoveSpeed * cos(this.moveAngle), this.cMoveSpeed * sin(this.moveAngle)];
+        this.headPos = [this.headPos[0] + dv[0], this.headPos[1] - dv[1]];
+        this.camPos = [(this.headPos[0] - this.camPos[0]) * this.camLerpSpeed + this.camPos[0], (this.headPos[1] - this.camPos[1]) * this.camLerpSpeed + this.camPos[1]];
 
-        let delta = sqrt(pow(this.headPos.x - this.bodySegments[0].x, 2) + pow(this.headPos.y - this.bodySegments[0].y, 2));
+        let delta = sqrt(pow(this.headPos[0] - this.bodySegments[0][0], 2) + pow(this.headPos[1] - this.bodySegments[0][1], 2));
         if (delta > this.minSegDistToUpdate)
         {
             this.bodySegments.unshift(this.headPos);
@@ -83,13 +85,13 @@ class Worm
         for (let i = 1; i < this.bodySegments.length; i++)
         {
 
-            let dx = this.bodySegments[i - 1].x - this.bodySegments[i].x;
-            let dy = this.bodySegments[i - 1].y - this.bodySegments[i].y;
+            let dx = this.bodySegments[i - 1][0] - this.bodySegments[i][0];
+            let dy = this.bodySegments[i - 1][1] - this.bodySegments[i][1];
             let sqrDDist = dx * dx + dy * dy;
 
             if (sqrDDist > this.distBetweenSegments * this.distBetweenSegments)
             {
-                this.bodySegments[i] = createVector(this.bodySegments[i].x + dx * 0.65, this.bodySegments[i].y + dy * 0.65)
+                this.bodySegments[i] = [this.bodySegments[i][0] + dx * 0.65, this.bodySegments[i][1] + dy * 0.65];
             }
         }
     }
@@ -114,7 +116,7 @@ class PlayerWorm extends Worm
     {
         super(headPos, radius, bodySegmentsNum);
 
-        this.inputAxis = createVector(0, 0);
+        this.inputAxis = [0, 0];
         print("player");
     }
 
@@ -127,19 +129,19 @@ class PlayerWorm extends Worm
 
     HandlePlayerInput()
     {
-        this.inputAxis = createVector(0, 0);
-        if (keyIsDown(38) || keyIsDown(87)) this.inputAxis.y += 1;
-        if (keyIsDown(40) || keyIsDown(83)) this.inputAxis.y -= 1;
-        if (keyIsDown(39) || keyIsDown(68)) this.inputAxis.x += 1;
-        if (keyIsDown(37) || keyIsDown(65)) this.inputAxis.x -= 1;
+        this.inputAxis = [0, 0];
+        if (keyIsDown(38) || keyIsDown(87)) this.inputAxis[1] += 1;
+        if (keyIsDown(40) || keyIsDown(83)) this.inputAxis[1] -= 1;
+        if (keyIsDown(39) || keyIsDown(68)) this.inputAxis[0] += 1;
+        if (keyIsDown(37) || keyIsDown(65)) this.inputAxis[0] -= 1;
 
-        if (this.inputAxis.x * this.inputAxis.x + this.inputAxis.y * this.inputAxis.y > 1)
+        if (this.inputAxis[0] * this.inputAxis[0] + this.inputAxis[1] * this.inputAxis[1] > 1)
         {
-            this.inputAxis.x *= 0.707;
-            this.inputAxis.y *= 0.707;
+            this.inputAxis[0] *= 0.707;
+            this.inputAxis[1] *= 0.707;
         }
-        this.cMoveSpeed = this.baseMoveSpeed + this.inputAxis.y * this.moveSpeed;
-        if (this.inputAxis.x != 0) this.cMoveSpeed += this.turnSpeedBoost;
-        this.moveAngle += -this.inputAxis.x * this.angularSpeed;
+        this.cMoveSpeed = this.baseMoveSpeed + this.inputAxis[1] * this.moveSpeed;
+        if (this.inputAxis[0] != 0) this.cMoveSpeed += this.turnSpeedBoost;
+        this.moveAngle += -this.inputAxis[0] * this.angularSpeed;
     }
 }

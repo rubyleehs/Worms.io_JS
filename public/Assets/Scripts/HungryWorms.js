@@ -13,9 +13,8 @@ function setup()
   createCanvas(600, 600);
   socket = io.connect('http://localhost:3000');
 
-  CreateWorm(createVector(random(10), random(10)), 7, true);
-  //CreateWorm(createVector(width / 3, height / 3), 7, true);
-  CreateConsumable(createVector(2, 2), 25);
+  CreateWorm([random(10), random(10)], 7, true);
+  CreateConsumable([2, 2], 25);
 }
 
 function draw()
@@ -32,10 +31,10 @@ function CreateWorm(position, radius, isPlayer)
   else w = new Worm(position, radius, 200);
 
   var data = {
-    hx: w.headPos.x,
-    hy: w.headPos.y,
-    cx: w.camPos.x,
-    cy: w.camPos.y,
+    hx: w.headPos[0],
+    hy: w.headPos[1],
+    cx: w.camPos[0],
+    cy: w.camPos[1],
     radius: w.radius,
     bodySegmentsNum: w.bodySegmentsNum
   };
@@ -58,13 +57,13 @@ function Update()
   CheckWormsConsuption();
 
   var data = {
-    hx: w.headPos.x,
-    hy: w.headPos.y,
-    cx: w.camPos.x,
-    cy: w.camPos.y,
+    hx: w.headPos[0],
+    hy: w.headPos[1],
+    cx: w.camPos[0],
+    cy: w.camPos[1],
     radius: w.radius,
     bodySegmentsNum: w.bodySegmentsNum,
-    bodySegments: [[0, 0], [1, 0], [2, 0], [3, 0]],
+    bodySegments: w.bodySegments,
   };
   socket.emit('update', data);
 }
@@ -84,7 +83,7 @@ function Show()
 
 function CalCamPosition(index)
 {
-  currentCamPos = createVector(worms[index].camPos.x - width * 0.5, worms[index].camPos.y - height * 0.5);
+  currentCamPos = [worms[index].camPos[0] - width * 0.5, worms[index].camPos[1] - height * 0.5];
 }
 
 function CheckWormsConsuption()
@@ -95,8 +94,8 @@ function CheckWormsConsuption()
   {
     for (let s = worms[i].unedibleSegments; s < worms[i].bodySegments.length; s += edibleSegmentsInterval)
     {
-      let deltaX = worms[i].bodySegments[s].x - headPos.x;
-      let deltaY = worms[i].bodySegments[s].y - headPos.y;
+      let deltaX = worms[i].bodySegments[s][0] - headPos[0];
+      let deltaY = worms[i].bodySegments[s][1] - headPos[1];
       if (deltaX * deltaX + deltaY * deltaY < worms[i].radius * worms[i].radius)
       {
         worms[cWormIndex].Grow(worms[i].bodySegments.length - s);
@@ -107,8 +106,8 @@ function CheckWormsConsuption()
 
   for (let i = 0; i < consumables.length; i++)
   {
-    let deltaX = consumables[i].position.x - headPos.x;
-    let deltaY = consumables[i].position.y - headPos.y;
+    let deltaX = consumables[i].position[0] - headPos[0];
+    let deltaY = consumables[i].position[1] - headPos[1];
     if (deltaX * deltaX + deltaY * deltaY < consumables[i].radius * consumables[i].radius)
     {
       worms[cWormIndex].Grow(consumables[i].amount);

@@ -64,6 +64,6 @@ function Connection(socket)
         cWorm.bodySegmentsNum = data.bodySegmentsNum
         cWorm.bodySegments = data.bodySegments;
 
-        console.log(data);
+        console.log('update received from: ' + socket.id);
     });
 }
