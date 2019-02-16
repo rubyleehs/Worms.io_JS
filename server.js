@@ -5,6 +5,17 @@ var io = require('socket.io')(server);
 
 var worms = [];
 
+function Worm(id, headPos, camPos, radius, bodySegmentsNum)
+{
+    this.id = id;
+    this.headPos = headPos;
+    this.camPos = camPos;
+
+    this.radius = radius;
+    this.bodySegmentsNum = bodySegmentsNum
+    this.bodySegments = [];
+}
+
 server.listen(3000, Listen);
 app.use(express.static('public'));
 

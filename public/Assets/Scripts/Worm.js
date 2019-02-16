@@ -3,17 +3,22 @@ class Worm
 {
     constructor(headPos, radius, bodySegmentsNum)
     {
+        //this.id = id;
         this.headPos = headPos;
         this.camPos = headPos;
 
         this.radius = radius;
         this.bodySegmentsNum = bodySegmentsNum
         this.bodySegments = [];
-        this.bodySegments[0] = headPos;
+    }
+
+    Start()
+    {
+        this.bodySegments[0] = this.headPos;
 
         this.distBetweenSegments = 1;
-        this.radiusDecaySegments = round(bodySegmentsNum * 0.4);
-        this.unedibleSegments = round(bodySegmentsNum * 0.1);
+        this.radiusDecaySegments = round(this.bodySegmentsNum * 0.4);
+        this.unedibleSegments = round(this.bodySegmentsNum * 0.1);
 
         this.camLerpSpeed = 0.04;
 

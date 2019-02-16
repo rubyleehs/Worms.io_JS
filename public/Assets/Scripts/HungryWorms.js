@@ -13,7 +13,7 @@ function setup()
   socket = io.connect('http://localhost:3000');
 
   CreateWorm(createVector(width / 2, height / 2), 7, true);
-  CreateWorm(createVector(width / 3, height / 3), 7, true);
+  //CreateWorm(createVector(width / 3, height / 3), 7, true);
   CreateConsumable(createVector(2, 2), 25);
 }
 
@@ -30,6 +30,7 @@ function CreateWorm(position, radius, isPlayer)
   if (isPlayer) w = new PlayerWorm(position, radius, 500);
   else w = new Worm(position, radius, 200);
 
+  w.Start();
   worms[worms.length] = w;
 }
 
